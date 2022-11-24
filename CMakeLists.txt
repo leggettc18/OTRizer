@@ -10,7 +10,7 @@ target_compile_options(OTRizer_compiler_flags INTERFACE
 )
 add_library(OTRizer STATIC Resource.cpp)
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    get_property(MSVC_RUNTIM_LIBRARY_DEFAULT TARGET SequenceOTRizer PROPERTY MSVC_RUNTIME_LIBRARY)
+    get_property(MSVC_RUNTIME_LIBRARY_DEFAULT TARGET OTRizer PROPERTY MSVC_RUNTIME_LIBRARY)
     if ("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
         string(CONCAT "MSVC_RUNTIME_LIBRARY_STR"
             $<$<CONFIG:Debug>:

@@ -1,0 +1,6 @@
+{
+    "cmake.configureSettings": {
+        "CMAKE_VS_PLATFORM_NAME": "x64",
+        "USE_AUTO_VCPKG": true
+    },
+}
