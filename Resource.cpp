@@ -31,8 +31,9 @@ void OTRizer::Resource::WriteHeader() {
     writer->Write((uint64_t)0);                  // ROM CRC, 0x14
     writer->Write((uint32_t)0);                  // ROM Enum, 0x1C
 
-    while (writer->GetBaseAddress() < 0x40)
+    while (writer->GetBaseAddress() < 0x40) {
         writer->Write((uint32_t)0); // To be used at a later date!
+    }
 }
 
 std::vector<char> OTRizer::Resource::ToVector() {
