@@ -1,0 +1,7 @@
+@PACKAGE_INIT@
+
+find_package(libultraship)
+
+if(NOT TARGET OTRizer::OTRizer)
+    include(${CMAKE_CURRENT_LIST_DIR}/OTRizerTargets.cmake)
+endif()

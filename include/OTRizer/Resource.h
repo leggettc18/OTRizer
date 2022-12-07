@@ -11,28 +11,28 @@ class Resource {
     /**
      * @brief Path of the file that will eventually be written to the OTR file.
      */
-    const std::string outPath;
+    const std::string OutPath;
     /**
      * @brief An integer representing the type of the resource.
      *
      * The mapping of integer to resource is defined by the game the
      * resource is intended for.
      */
-    uint32_t resType;
+    uint32_t ResType;
     /**
      * @brief An integer representing the game version the resource was generated for.
      *
      * The mapping of integer to game version is defined by the game the
      * resource is intended for.
      */
-    uint32_t gameVersion;
+    uint32_t GameVersion;
     /**
      * @brief An integer representing the version of the resource's binary format that is stored in the file.
      *
      * The mapping of integer to resource version is defined by the game the
      * resource is intended for.
      */
-    uint32_t resVersion;
+    uint32_t ResVersion;
 
     /**
      * @brief Writes the header and resource data into the OTR File

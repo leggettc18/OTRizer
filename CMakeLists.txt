@@ -1,45 +1,78 @@
-cmake_minimum_required(VERSION 3.16.0)
+cmake_minimum_required(VERSION 3.24.0)
 project(OTRizer VERSION 0.2)
-add_library(OTRizer_compiler_flags INTERFACE)
-target_compile_features(OTRizer_compiler_flags INTERFACE cxx_std_20)
+add_library(OTRizer Resource.cpp)
+add_library(OTRizer::OTRizer ALIAS OTRizer)
+option(BUILD_SHARED_LIBS "Build shared library" OFF)
+include(GenerateExportHeader)
+generate_export_header(OTRizer
+    EXPORT_MACRO_NAME OTRIZER_API
+    EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/include/OTRizer/core/common.h
+)
+target_compile_features(OTRizer PUBLIC cxx_std_20)
 set(gcc_like_cxx "$<COMPILE_LANG_AND_ID:CXX,ARMClang,AppleClang,Clang,GNU,LCC>")
 set(msvc_like_cxx "$<COMPILE_LANG_AND_ID:CXX,MSVC>")
-target_compile_options(OTRizer_compiler_flags INTERFACE
-    "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wextra;-Wshadow;-Wformat=2;-Wunused>>"
-    "$<${msvc_like_cxx}:$<BUILD_INTERFACE:-W3>>"
+target_compile_options(OTRizer PRIVATE
+    "$<${gcc_like_cxx}:$<$<CONFIG:Debug>:-O0;-Wall;-Wextra;-Wshadow;-Wformat=2;-Wunused>>"
+    "$<${msvc_like_cxx}:$<$<CONFIG:Debug>:/Od;/Wall;/Zi;>>"
 )
-add_library(OTRizer STATIC Resource.cpp)
-if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    get_property(MSVC_RUNTIME_LIBRARY_DEFAULT TARGET OTRizer PROPERTY MSVC_RUNTIME_LIBRARY)
-    if ("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
-        string(CONCAT "MSVC_RUNTIME_LIBRARY_STR"
-            $<$<CONFIG:Debug>:
-				MultiThreadedDebug
-			>
-			$<$<CONFIG:Release>:
-				MultiThreaded
-			>
-			$<$<NOT:$<OR:$<CONFIG:Debug>,$<CONFIG:Release>>>:${MSVC_RUNTIME_LIBRARY_DEFAULT}>
-        )
-    elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "Win32")
-		string(CONCAT "MSVC_RUNTIME_LIBRARY_STR"
-			$<$<CONFIG:Debug>:
-				MultiThreadedDebug
-			>
-			$<$<CONFIG:Release>:
-				MultiThreaded
-			>
-			$<$<NOT:$<OR:$<CONFIG:Debug>,$<CONFIG:Release>>>:${MSVC_RUNTIME_LIBRARY_DEFAULT}>
-		)
-	endif()
-	set_target_properties(OTRizer PROPERTIES MSVC_RUNTIME_LIBRARY ${MSVC_RUNTIME_LIBRARY_STR})
-endif()
-target_include_directories(OTRizer INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
-include(FetchContent)
-FetchContent_Declare(
-    libultraship
-    GIT_REPOSITORY https://github.com/Kenix3/libultraship
-    GIT_TAG 823d98f3dd5f7f82fb70a31c9ac1fc01ea584f5f
+target_include_directories(OTRizer
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+    PRIVATE 
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )
-FetchContent_MakeAvailable(libultraship)
-target_link_libraries(OTRizer PUBLIC libultraship OTRizer_compiler_flags)
+set_target_properties(OTRizer PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+)
+
+find_package(libultraship)
+target_link_libraries(OTRizer PUBLIC libultraship::libultraship)
+
+include(GNUInstallDirs)
+
+install(TARGETS OTRizer
+    EXPORT OTRizerTargets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/OTRizer
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(EXPORT OTRizerTargets
+    FILE OTRizerTargets.cmake
+    NAMESPACE OTRizer::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/OTRizer
+)
+
+include(CMakePackageConfigHelpers)
+
+configure_package_config_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/OTRizerConfig.cmake.in
+    ${CMAKE_BINARY_DIR}/cmake/OTRizerConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/OTRizer
+)
+
+write_basic_package_version_file(
+    ${CMAKE_BINARY_DIR}/cmake/OTRizerConfigVersion.cmake
+    VERSION ${OTRIZER_VERSION}
+    COMPATIBILITY AnyNewerVersion
+)
+
+install(
+    FILES
+        ${CMAKE_BINARY_DIR}/cmake/OTRizerConfig.cmake
+        ${CMAKE_BINARY_DIR}/cmake/OTRizerConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/OTRizer
+)
+
+export(EXPORT OTRizerTargets
+    FILE ${CMAKE_BINARY_DIR}/cmake/OTRizerTargets.cmake
+    NAMESPACE OTRizer::
+)
