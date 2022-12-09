@@ -71,7 +71,7 @@ install(
         ${CMAKE_BINARY_DIR}/cmake/OTRizerConfig.cmake
         ${CMAKE_BINARY_DIR}/cmake/OTRizerConfigVersion.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/OTRizer
-    COMPONENT Runtime
+    COMPONENT Development
 )
 
 export(EXPORT OTRizerTargets
